@@ -52,16 +52,16 @@ rate = 0.002
 -- from input data and expected output, the NN evolves.
 learn :: (Vector Double, Vector Double) -> NN -> NN
 learn (inp, out) nn@(NN{network=net,activate'=af'}) =
-  let (sn, an):tr = forwardWithTrace inp nn
+  let (bn, an):inner = forwardWithTrace inp nn
       -- calculate the delta_n for the last layer
       -- w.r.t. the expected output
-      dn = (zipVectorWith cost' an out) `hadamad` (cmap af' sn)
+      dn = (zipVectorWith cost' an out) `hadamad` (cmap af' bn)
       ds :: [Vector Double]
-      ds = dn : zipWith3 backPropagation net ds tr
+      ds = dn : zipWith3 backPropagation net ds inner
       backPropagation wia1 dia1 (si,_) = (wia1 #> dia1) `hadamad` (cmap af' si)
       -- update for each layer (reversed order)
       md :: [Matrix Double]
-      md = zipWith outer (map snd tr ++ [inp]) ds
+      md = zipWith outer (map snd inner ++ [inp]) ds
   in nn{network=zipWith add (reverse md) net}
   where
     hadamad = zipVectorWith (*)

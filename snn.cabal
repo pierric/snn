@@ -17,8 +17,8 @@ cabal-version:       >=1.10
 
 executable snn
   main-is:             Main.hs
-  other-modules:       SNN
+  other-modules:       SNN, Parser
   -- other-extensions:
-  build-depends:       base, hmatrix, mwc-random
+  build-depends:       base, hmatrix, mwc-random, zlib, binary, bytestring
   -- hs-source-dirs:
   default-language:    Haskell2010
