@@ -4,7 +4,7 @@ import SNN
 import Parser
 import Numeric.LinearAlgebra (Vector, vector)
 
-import Data.List(foldl')
+import Data.List(foldl',partition,maximumBy)
 import Text.Printf (printf)
 import Text.PrettyPrint.Boxes
 import Numeric.LinearAlgebra.Data
@@ -19,7 +19,8 @@ mnistMain = do
     testset <- uncurry zip <$> testData
     putStrLn "Test"
     let nns = iterate (online dataset) nn
-    test (nns!!10) (head testset)
+        nn' = nns!!100
+    nn' `seq` dotest nn' testset
     return ()
 
 online dataset nn = foldl' (flip learn) nn dataset
@@ -31,11 +32,18 @@ preprocess (i, l) =
         ov = vector (replicate ll 0 ++ [1] ++ replicate (9-ll) 0)
     in (iv, ov)
 
-test :: NN -> (Image, Label) -> IO ()
-test nn t = printO $ forward (fst $ preprocess t) nn
+postprocess :: Vector Double -> Label
+postprocess = fst . maximumBy cmp . zip [0..] . toList
+  where cmp a b = compare (snd a) (snd b)
 
-printO = mapM_ (\(v, a) -> putStrLn $ show v ++ " : " ++ show a) . zip [0..] . toList
+dotest :: NN -> [(Image, Label)] -> IO ()
+dotest nn t = do
+    let result = map (postprocess . flip forward nn . fst . preprocess) t
+        expect = map snd t
+        (co,wr)= partition (uncurry (==)) $ zip result expect
+    putStrLn $ printf "correct: %d, wrong: %d" (length co) (length wr)
 
+-- printO = mapM_ (\(v, a) -> putStrLn $ show v ++ " : " ++ show a) . zip [0..] . toList
 
 dumpMain = do
     let nn = newNN [2,2,2]
@@ -48,20 +56,6 @@ dumpMain = do
     dumpNN (ns !! 2000)
     dumpNN (ns !! 3000)
     dumpNN (ns !! 4000)
-
-
-dumpNN nn@(NN{network=net}) = do
-    putStrLn $ render $ hsep 6 top [dump, apply]
-  where
-    dump  = vcat left [text "=========== DUMP NN ===========", hsep 5 center1 (map prL net)]
-    apply= vcat left [text "===========  APPLY  ===========", body]
-    body = text $ show $ forward (vector [0,1]) nn
-
-prL l = hsep 1 center1 [prM (weights l), text "+", prB (biases l)]
-prM m = vcat right (map prV (toRows m))
-prV v = hsep 2 center1 (map prE (toList v))
-prB b = vcat right (map prE (toList b))
-prE f = text $ printf "%.4f" f
 
 stepMain = do
   let l1 = (2><2) [-0.0213,  0.0144, 0.0014,  -0.0001]
@@ -77,3 +71,16 @@ stepMain = do
       nns = iterate step2 nn
   dumpNN nn
   dumpNN $ step4 $ step3 $ step2 $ step1 nn
+
+dumpNN nn@(NN{network=net}) = do
+    putStrLn $ render $ hsep 6 top [dump, apply]
+  where
+    dump  = vcat left [text "=========== DUMP NN ===========", hsep 5 center1 (map prL net)]
+    apply= vcat left [text "===========  APPLY  ===========", body]
+    body = text $ show $ forward (vector [0,1]) nn
+
+prL l = hsep 1 center1 [prM (weights l), text "+", prB (biases l)]
+prM m = vcat right (map prV (toRows m))
+prV v = hsep 2 center1 (map prE (toList v))
+prB b = vcat right (map prE (toList b))
+prE f = text $ printf "%.4f" f
