@@ -5,7 +5,6 @@ import Numeric.LinearAlgebra.Devel
 import System.Random.MWC
 import System.Random.MWC.Distributions
 import Control.Monad.ST
-import Data.List
 
 import Debug.Trace
 

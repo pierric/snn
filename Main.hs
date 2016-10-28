@@ -1,13 +1,14 @@
+{-# LANGUAGE BangPatterns #-}
 module Main where
 
 import SNN
 import Parser
-import Numeric.LinearAlgebra (Vector, vector)
 
+import Numeric.LinearAlgebra
+import Numeric.LinearAlgebra.Data
 import Data.List(foldl',partition,maximumBy)
 import Text.Printf (printf)
 import Text.PrettyPrint.Boxes
-import Numeric.LinearAlgebra.Data
 
 main = mnistMain
 
@@ -18,16 +19,19 @@ mnistMain = do
     putStrLn "Load test data."
     testset <- uncurry zip <$> testData
     putStrLn "Test"
-    let nns = iterate (online dataset) nn
-        nn' = nns!!100
+    let nns = iterate' (online dataset) nn
+        nn' = nns!!5
     nn' `seq` dotest nn' testset
     return ()
+  where
+    iterate' :: (a -> a) -> a -> [a]
+    iterate' f x = x `seq` x : iterate' f (f x)
 
-online dataset nn = foldl' (flip learn) nn dataset
+online = flip (foldl' (flip learn))
 
 preprocess :: (Image, Label) -> (Vector Double, Vector Double)
-preprocess (i, l) =
-    let iv = vector $ map ((/256) . fromIntegral) i
+preprocess (!i, !l) =
+    let iv = i
         ll = fromIntegral l
         ov = vector (replicate ll 0 ++ [1] ++ replicate (9-ll) 0)
     in (iv, ov)

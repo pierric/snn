@@ -4,9 +4,12 @@ import Data.Binary.Get
 import qualified Data.ByteString.Lazy as BS
 import Codec.Compression.GZip (decompress)
 import Control.Monad
+import Numeric.LinearAlgebra
+import Numeric.LinearAlgebra.Devel
+import Data.Functor.Identity
 
 type Pixel = Word8
-type Image = [Pixel]
+type Image = Vector Double
 type Label = Word8
 
 decodeImages :: Get [Image]
@@ -17,7 +20,11 @@ decodeImages = do
     guard (d2 == 28 && d3 == 28)
     many d1 pic
   where
-    pic = many (28*28) (get :: Get Pixel)
+    pic :: Get Image
+    pic = do
+      bs <- getByteString (28*28)
+      return $ toVecDouble $ (fromByteString bs :: Vector Pixel)
+    toVecDouble = runIdentity . mapVectorM (return . (/256) . fromIntegral)
 
 decodeLabels :: Get [Label]
 decodeLabels = do
