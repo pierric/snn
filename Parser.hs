@@ -4,13 +4,14 @@ import Data.Binary.Get
 import qualified Data.ByteString.Lazy as BS
 import Codec.Compression.GZip (decompress)
 import Control.Monad
-import Numeric.LinearAlgebra
+import Numeric.LinearAlgebra hiding (R)
 import Numeric.LinearAlgebra.Devel
-import Data.Functor.Identity
+import Control.Monad.ST
 
+type R = Float
 type Pixel = Word8
-type Image = Vector Double
-type Label = Word8
+type Image = Vector R
+type Label = Vector R
 
 decodeImages :: Get [Image]
 decodeImages = do
@@ -24,14 +25,22 @@ decodeImages = do
     pic = do
       bs <- getByteString (28*28)
       return $ toVecDouble $ (fromByteString bs :: Vector Pixel)
-    toVecDouble = runIdentity . mapVectorM (return . (/256) . fromIntegral)
+    toVecDouble :: Vector Pixel -> Image
+    -- mapVectorM requires the monad be strict
+    -- so Identity monad shall not be used
+    toVecDouble v = runST $ mapVectorM (return . (/255) . fromIntegral) v
 
 decodeLabels :: Get [Label]
 decodeLabels = do
     mc <- getWord32be
     guard (mc == 0x00000801)
     d1 <- getWord32be
-    many d1 (get :: Get Label)
+    many d1 lbl
+  where
+    lbl :: Get Label
+    lbl = do
+      v <- fromIntegral <$> (get :: Get Word8)
+      return $ fromList (replicate v 0 ++ [1] ++ replicate (9-v) 0)
 
 many :: (Integral n, Monad m) => n -> m a -> m [a]
 many cnt dec = sequence (replicate (fromIntegral cnt) dec)

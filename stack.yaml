@@ -63,11 +63,11 @@ arch: x86_64
 #
 # Extra directories used by stack for building
 extra-include-dirs:
-- D:\Dev\NN\OpenBLAS-v0.2.15-Win64-int32\include
+- C:\Users\jiase\Develop\OpenBLAS-v0.2.15-Win64-int32\xianyi-OpenBLAS-9a7e0ec\dist\include
 extra-lib-dirs:
-- D:\Dev\NN\OpenBLAS-v0.2.15-Win64-int32\lib
+- C:\Users\jiase\Develop\OpenBLAS-v0.2.15-Win64-int32\xianyi-OpenBLAS-9a7e0ec\dist\lib
 #
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
 ghc-options:
-    "*": -Wall -O2
+    "*": -O3 -rtsopts
