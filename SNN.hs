@@ -57,11 +57,9 @@ relu' x | x < 0     = 0
 cost' a y | y == 1 && a >= y = 0
           | otherwise        = a - y
 
-rate = 0.002
-
 -- from input data and expected output, the NN evolves.
-learn :: (Vector R, Vector R) -> NN -> NN
-learn (inp, out) nn@(NN{network=net,activate'=af'}) =
+learn :: (Vector R, Vector R) -> R -> NN -> NN
+learn (inp, out) rate nn@(NN{network=net,activate'=af'}) =
     let (bn, an):ls = forwardWithTrace inp nn
         -- calculate the delta_n for the last layer
         -- w.r.t. the expected output

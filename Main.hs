@@ -24,7 +24,7 @@ makeMNIST = do
     let nns = iterate (online dataset) nn
     return $ nns!!50
 
-online = flip (foldl' (flip learn))
+online = flip (foldl' (flip (flip learn 0.002)))
 postprocess :: Vector SNN.R -> Int
 postprocess = fst . maximumBy cmp . zip [0..] . toList
   where cmp a b = compare (snd a) (snd b)
@@ -49,7 +49,7 @@ dumpMain = do
     let nn = newNN [2,3,2]
         ds = [([0,0],[1,0]), ([0,1],[0,1]), ([1,0],[0,1]), ([1,1],[1,0])]
         inp = map (\(l1, l2) -> (fromList l1, fromList l2)) ds
-        pass n0 = foldl' (flip learn) n0 inp
+        pass n0 = foldl' (flip (flip learn 0.5)) n0 inp
         ns = iterate pass nn
     dumpNN nn
     dumpNN (ns !! 1000)
@@ -64,10 +64,10 @@ stepMain = do
       b2 = fromList [0.5349, 0.5349]
       nt = [LL l1 b1, LL l2 b2]
       nn = NN { network = nt, activate = relu, activate' = relu' }
-      step1 = learn (fromList [0,0], fromList [1,0])
-      step2 = learn (fromList [0,1], fromList [0,1])
-      step3 = learn (fromList [1,0], fromList [0,1])
-      step4 = learn (fromList [1,1], fromList [0,0])
+      step1 = learn (fromList [0,0], fromList [1,0]) 0.5
+      step2 = learn (fromList [0,1], fromList [0,1]) 0.5
+      step3 = learn (fromList [1,0], fromList [0,1]) 0.5
+      step4 = learn (fromList [1,1], fromList [0,0]) 0.5
       nns = iterate step2 nn
   dumpNN nn
   dumpNN $ step4 $ step3 $ step2 $ step1 nn
