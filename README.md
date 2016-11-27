@@ -1,6 +1,8 @@
 # SNN
 This program implements a simple neron network, and is applied to solve digit recoginition task (MNIST).
 
+The highest accuracy so far, using 30 neurons, is 95.89%.
+
 ## Note on Windows:
 + The depend library HMatrix requires some efforts to install.
   + The version on Hackage of 0.17.0.2 does not work. It will produce linkage errors, complaining that symbols "random" and "rand48" not found. Instead, please download [the head version](https://github.com/albertoruiz/hmatrix) of HMatrix from github. Place it on the upper directory of this project, as specified in the stack.yaml.
