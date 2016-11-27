@@ -4,7 +4,7 @@ This program implements a simple neron network, and is applied to solve digit re
 The highest accuracy so far, using 30 neurons, is 95.89%.
 
 ## Note 
-This project is just a initial learning/experiment of neuron network. Its source code is further absorbed in the [cnn](https://github.com/pierric/cnn).
+This project was only a initial learning/experiment of neuron network. Its source code is now further absorbed in the [cnn](https://github.com/pierric/cnn).
 
 ## Note on Windows:
 + The depend library HMatrix requires some efforts to install.
