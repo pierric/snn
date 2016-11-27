@@ -3,6 +3,9 @@ This program implements a simple neron network, and is applied to solve digit re
 
 The highest accuracy so far, using 30 neurons, is 95.89%.
 
+## Note 
+This project is just a initial learning/experiment of neuron network. Its source code is further absorbed in the [cnn](https://github.com/pierric/cnn).
+
 ## Note on Windows:
 + The depend library HMatrix requires some efforts to install.
   + The version on Hackage of 0.17.0.2 does not work. It will produce linkage errors, complaining that symbols "random" and "rand48" not found. Instead, please download [the head version](https://github.com/albertoruiz/hmatrix) of HMatrix from github. Place it on the upper directory of this project, as specified in the stack.yaml.
